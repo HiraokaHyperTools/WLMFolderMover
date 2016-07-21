@@ -172,27 +172,33 @@ namespace WLMFolderMover {
 
             Trace.Assert(Api.TryMoveFirst(ses.JetSesid, Messages.JetTableid));
 
-            while (true) {
-                Int64 MSGCOL_FOLDERID = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_FOLDERID).Value;
-                if (MSGCOL_FOLDERID == FLDCOL_ID) {
-                    Int64 MSGCOL_DATE = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_DATE).Value;
-                    DateTime dt = new DateTime(MSGCOL_DATE).AddYears(1600).ToLocalTime();
-                    String MSGCOL_NORMALSUBJ = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_NORMALSUBJ);
-                    String MSGCOL_EMAILFROM = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_EMAILFROM, Encoding.Default);
+            lvM.Hide();
+            try {
+                while (true) {
+                    Int64 MSGCOL_FOLDERID = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_FOLDERID).Value;
+                    if (MSGCOL_FOLDERID == FLDCOL_ID) {
+                        Int64 MSGCOL_DATE = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_DATE).Value;
+                        DateTime dt = new DateTime(MSGCOL_DATE).AddYears(1600).ToLocalTime();
+                        String MSGCOL_NORMALSUBJ = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_NORMALSUBJ);
+                        String MSGCOL_EMAILFROM = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_EMAILFROM, Encoding.Default);
 
-                    byte[] bookmark = Api.GetBookmark(ses.JetSesid, Messages.JetTableid);
+                        byte[] bookmark = Api.GetBookmark(ses.JetSesid, Messages.JetTableid);
 
-                    ListViewItem lvi = new ListViewItem(MSGCOL_NORMALSUBJ);
-                    lvi.ImageKey = "M";
-                    lvi.SubItems.Add(dt.ToString("yyyy/MM/dd HH:mm:ss"));
-                    lvi.SubItems.Add(MSGCOL_EMAILFROM);
-                    lvi.Tag = bookmark;
-                    lvM.Items.Add(lvi);
+                        ListViewItem lvi = new ListViewItem(MSGCOL_NORMALSUBJ);
+                        lvi.ImageKey = "M";
+                        lvi.SubItems.Add(dt.ToString("yyyy/MM/dd HH:mm:ss"));
+                        lvi.SubItems.Add(MSGCOL_EMAILFROM);
+                        lvi.Tag = bookmark;
+                        lvM.Items.Add(lvi);
+                    }
+
+                    if (Api.TryMoveNext(ses.JetSesid, Messages.JetTableid))
+                        continue;
+                    break;
                 }
-
-                if (Api.TryMoveNext(ses.JetSesid, Messages.JetTableid))
-                    continue;
-                break;
+            }
+            finally {
+                lvM.Show();
             }
         }
 
