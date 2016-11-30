@@ -17,7 +17,7 @@ namespace WLMFolderMover {
 
         internal Instance inst;
         internal Session ses;
-        internal Table Folders, Messages;
+        internal Table Folders, Messages, Streams, Uidl;
 
         class AH : IDisposable {
             Cursor prev;
@@ -46,7 +46,11 @@ namespace WLMFolderMover {
         class CCol {
             internal JET_COLUMNID FLDCOL_ID, FLDCOL_PARENT, FLDCOL_NAME, FLDCOL_FLAGS;
 
-            internal JET_COLUMNID MSGCOL_FOLDERID, MSGCOL_NORMALSUBJ, MSGCOL_DATE, MSGCOL_EMAILFROM, MSGCOL_POP3UIDL;
+            internal JET_COLUMNID MSGCOL_FOLDERID, MSGCOL_NORMALSUBJ, MSGCOL_DATE, MSGCOL_EMAILFROM, MSGCOL_POP3UIDL, MSGCOL_STREAM, MSGCOL_MESSAGEID;
+
+            internal JET_COLUMNID Streams_Id;
+
+            internal JET_COLUMNID UIDLCOL_UIDL;
         }
 
         CCol C = new CCol();
@@ -65,6 +69,12 @@ namespace WLMFolderMover {
             C.MSGCOL_DATE = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_DATE");
             C.MSGCOL_EMAILFROM = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_EMAILFROM");
             C.MSGCOL_POP3UIDL = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_POP3UIDL");
+            C.MSGCOL_STREAM = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_STREAM");
+            C.MSGCOL_MESSAGEID = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_MESSAGEID");
+
+            C.Streams_Id = Api.GetTableColumnid(ses.JetSesid, Streams.JetTableid, "Id");
+
+            C.UIDLCOL_UIDL = Api.GetTableColumnid(ses.JetSesid, Uidl.JetTableid, "UIDLCOL_UIDL");
 
             tvF.Nodes.Clear();
             Walk(-1, tvF.Nodes);
@@ -183,6 +193,8 @@ namespace WLMFolderMover {
                         String MSGCOL_NORMALSUBJ = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_NORMALSUBJ);
                         String MSGCOL_EMAILFROM = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_EMAILFROM, Encoding.Default);
                         String MSGCOL_POP3UIDL = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_POP3UIDL, Encoding.Unicode);
+                        UInt32 MSGCOL_STREAM = Api.RetrieveColumnAsUInt32(ses.JetSesid, Messages.JetTableid, C.MSGCOL_STREAM) ?? 0U;
+                        String MSGCOL_MESSAGEID = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_MESSAGEID, Encoding.GetEncoding("latin1"));
 
                         byte[] bookmark = Api.GetBookmark(ses.JetSesid, Messages.JetTableid);
 
@@ -190,7 +202,9 @@ namespace WLMFolderMover {
                         lvi.ImageKey = "M";
                         lvi.SubItems.Add(dt.ToString("yyyy/MM/dd HH:mm:ss"));
                         lvi.SubItems.Add(MSGCOL_EMAILFROM);
-                        lvi.SubItems.Add(MSGCOL_POP3UIDL);
+                        lvi.SubItems.Add(MSGCOL_POP3UIDL);//SubItems[3]
+                        lvi.SubItems.Add(MSGCOL_STREAM + "");//SubItems[4]
+                        lvi.SubItems.Add(MSGCOL_MESSAGEID);//SubItems[5]
                         lvi.Tag = bookmark;
                         lvM.Items.Add(lvi);
                     }
@@ -231,6 +245,57 @@ namespace WLMFolderMover {
 
         private void lvM_ItemDrag(object sender, ItemDragEventArgs e) {
             lvM.DoDragDrop(lvM.SelectedItems, DragDropEffects.Move);
+        }
+
+        private void mFilterLost_Click(object sender, EventArgs e) {
+            Api.JetSetCurrentIndex(ses.JetSesid, Streams.JetTableid, "Id");
+            foreach (ListViewItem lvi in lvM.Items) {
+                uint Id;
+                if (UInt32.TryParse(lvi.SubItems[4].Text, out Id)) {
+                    bool lost = true;
+                    Api.MakeKey(ses.JetSesid, Streams.JetTableid, Id, MakeKeyGrbit.NewKey);
+                    if (Api.TrySeek(ses.JetSesid, Streams.JetTableid, SeekGrbit.SeekEQ)) {
+                        UInt32 RealId = Api.RetrieveColumnAsUInt32(ses.JetSesid, Streams.JetTableid, C.Streams_Id) ?? 0U;
+                        if (RealId == Id) {
+                            lost = false;
+                        }
+                    }
+                    lvi.Selected = lost;
+                }
+            }
+            MessageBox.Show(this, lvM.SelectedItems.Count.ToString("#,##0") + " 件、選択しました。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void mDeleteUidl_Click(object sender, EventArgs e) {
+            if (MessageBox.Show(this, lvM.SelectedItems.Count.ToString("#,##0") + " 件、削除します。", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) != DialogResult.OK)
+                return;
+
+            Api.JetSetCurrentIndex(ses.JetSesid, Uidl.JetTableid, "0");
+            foreach (ListViewItem lvi in lvM.SelectedItems) {
+                String FindUidl = lvi.SubItems[3].Text;
+                Api.MakeKey(ses.JetSesid, Uidl.JetTableid, FindUidl, Encoding.Unicode, MakeKeyGrbit.NewKey);
+                if (Api.TrySeek(ses.JetSesid, Uidl.JetTableid, SeekGrbit.SeekGE)) {
+                    String RealUidl = Api.RetrieveColumnAsString(ses.JetSesid, Uidl.JetTableid, C.UIDLCOL_UIDL, Encoding.Unicode);
+                    if (FindUidl == RealUidl) {
+                        Api.JetDelete(ses.JetSesid, Uidl.JetTableid);
+                    }
+                }
+            }
+        }
+
+        private void mSelDup_Click(object sender, EventArgs e) {
+            SortedDictionary<string, string> messageIds = new SortedDictionary<string, string>();
+            foreach (ListViewItem lvi in lvM.Items) {
+                String messageId = lvi.SubItems[5].Text;
+                if (messageIds.ContainsKey(messageId)) {
+                    lvi.Selected = true;
+                }
+                else {
+                    messageIds[messageId] = null;
+                    lvi.Selected = false;
+                }
+            }
+            MessageBox.Show(this, lvM.SelectedItems.Count.ToString("#,##0") + " 件、選択しました。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

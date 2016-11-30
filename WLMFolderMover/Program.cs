@@ -47,12 +47,17 @@ namespace WLMFolderMover {
 
                     try {
                         using (Table Folders = new Table(ses.JetSesid, dbid, "Folders", isReadOnly ? OpenTableGrbit.ReadOnly : OpenTableGrbit.None))
-                        using (Table Messages = new Table(ses.JetSesid, dbid, "Messages", isReadOnly ? OpenTableGrbit.ReadOnly : OpenTableGrbit.None)) {
+                        using (Table Messages = new Table(ses.JetSesid, dbid, "Messages", isReadOnly ? OpenTableGrbit.ReadOnly : OpenTableGrbit.None))
+                        using (Table Streams = new Table(ses.JetSesid, dbid, "Streams", isReadOnly ? OpenTableGrbit.ReadOnly : OpenTableGrbit.None))
+                        using (Table Uidl = new Table(ses.JetSesid, dbid, "Uidl", isReadOnly ? OpenTableGrbit.ReadOnly : OpenTableGrbit.None)) 
+                        {
                             WForm form = new WForm();
                             form.inst = inst;
                             form.ses = ses;
                             form.Folders = Folders;
                             form.Messages = Messages;
+                            form.Streams = Streams;
+                            form.Uidl = Uidl;
                             Application.Run(form);
                         }
                     }
