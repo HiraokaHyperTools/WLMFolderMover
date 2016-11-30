@@ -33,9 +33,9 @@
             this.chTTL = new System.Windows.Forms.ColumnHeader();
             this.chDate = new System.Windows.Forms.ColumnHeader();
             this.chFrom = new System.Windows.Forms.ColumnHeader();
+            this.chUidl = new System.Windows.Forms.ColumnHeader();
             this.label2 = new System.Windows.Forms.Label();
             this.ofdDb = new System.Windows.Forms.OpenFileDialog();
-            this.chUidl = new System.Windows.Forms.ColumnHeader();
             this.vsc.Panel1.SuspendLayout();
             this.vsc.Panel2.SuspendLayout();
             this.vsc.SuspendLayout();
@@ -57,7 +57,7 @@
             // 
             this.vsc.Panel2.Controls.Add(this.lvM);
             this.vsc.Panel2.Controls.Add(this.label2);
-            this.vsc.Size = new System.Drawing.Size(635, 462);
+            this.vsc.Size = new System.Drawing.Size(887, 390);
             this.vsc.SplitterDistance = 214;
             this.vsc.SplitterWidth = 6;
             this.vsc.TabIndex = 0;
@@ -71,7 +71,7 @@
             this.tvF.Location = new System.Drawing.Point(0, 12);
             this.tvF.Name = "tvF";
             this.tvF.SelectedImageIndex = 0;
-            this.tvF.Size = new System.Drawing.Size(214, 450);
+            this.tvF.Size = new System.Drawing.Size(214, 378);
             this.tvF.TabIndex = 1;
             this.tvF.DragDrop += new System.Windows.Forms.DragEventHandler(this.tvF_DragDrop);
             this.tvF.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvF_AfterSelect);
@@ -110,7 +110,7 @@
             this.lvM.GridLines = true;
             this.lvM.Location = new System.Drawing.Point(0, 12);
             this.lvM.Name = "lvM";
-            this.lvM.Size = new System.Drawing.Size(415, 450);
+            this.lvM.Size = new System.Drawing.Size(667, 378);
             this.lvM.SmallImageList = this.il16;
             this.lvM.TabIndex = 1;
             this.lvM.UseCompatibleStateImageBehavior = false;
@@ -135,6 +135,11 @@
             this.chFrom.Text = "From";
             this.chFrom.Width = 100;
             // 
+            // chUidl
+            // 
+            this.chUidl.Text = "POP3 Uidl";
+            this.chUidl.Width = 130;
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -150,15 +155,11 @@
             this.ofdDb.FileName = "C:\\Proj\\eseViewer\\eseSamp\\Mail.MSMessageStore";
             this.ofdDb.Filter = "Mail.MSMessageStore|Mail.MSMessageStore";
             // 
-            // chUidl
-            // 
-            this.chUidl.Text = "POP3 Uidl";
-            // 
             // WForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(635, 462);
+            this.ClientSize = new System.Drawing.Size(887, 390);
             this.Controls.Add(this.vsc);
             this.Name = "WForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
