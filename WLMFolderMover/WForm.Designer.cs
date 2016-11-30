@@ -35,6 +35,7 @@
             this.chFrom = new System.Windows.Forms.ColumnHeader();
             this.label2 = new System.Windows.Forms.Label();
             this.ofdDb = new System.Windows.Forms.OpenFileDialog();
+            this.chUidl = new System.Windows.Forms.ColumnHeader();
             this.vsc.Panel1.SuspendLayout();
             this.vsc.Panel2.SuspendLayout();
             this.vsc.SuspendLayout();
@@ -102,7 +103,8 @@
             this.lvM.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chTTL,
             this.chDate,
-            this.chFrom});
+            this.chFrom,
+            this.chUidl});
             this.lvM.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvM.FullRowSelect = true;
             this.lvM.GridLines = true;
@@ -148,6 +150,10 @@
             this.ofdDb.FileName = "C:\\Proj\\eseViewer\\eseSamp\\Mail.MSMessageStore";
             this.ofdDb.Filter = "Mail.MSMessageStore|Mail.MSMessageStore";
             // 
+            // chUidl
+            // 
+            this.chUidl.Text = "POP3 Uidl";
+            // 
             // WForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -180,6 +186,7 @@
         private System.Windows.Forms.ColumnHeader chTTL;
         private System.Windows.Forms.ColumnHeader chDate;
         private System.Windows.Forms.ColumnHeader chFrom;
+        private System.Windows.Forms.ColumnHeader chUidl;
     }
 }
 

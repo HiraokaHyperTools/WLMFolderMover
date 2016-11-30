@@ -46,7 +46,7 @@ namespace WLMFolderMover {
         class CCol {
             internal JET_COLUMNID FLDCOL_ID, FLDCOL_PARENT, FLDCOL_NAME, FLDCOL_FLAGS;
 
-            internal JET_COLUMNID MSGCOL_FOLDERID, MSGCOL_NORMALSUBJ, MSGCOL_DATE, MSGCOL_EMAILFROM;
+            internal JET_COLUMNID MSGCOL_FOLDERID, MSGCOL_NORMALSUBJ, MSGCOL_DATE, MSGCOL_EMAILFROM, MSGCOL_POP3UIDL;
         }
 
         CCol C = new CCol();
@@ -64,6 +64,7 @@ namespace WLMFolderMover {
             C.MSGCOL_DATE = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_DATE");
             C.MSGCOL_DATE = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_DATE");
             C.MSGCOL_EMAILFROM = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_EMAILFROM");
+            C.MSGCOL_POP3UIDL = Api.GetTableColumnid(ses.JetSesid, Messages.JetTableid, "MSGCOL_POP3UIDL");
 
             tvF.Nodes.Clear();
             Walk(-1, tvF.Nodes);
@@ -175,12 +176,13 @@ namespace WLMFolderMover {
             lvM.Hide();
             try {
                 while (true) {
-                    Int64 MSGCOL_FOLDERID = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_FOLDERID).Value;
-                    if (MSGCOL_FOLDERID == FLDCOL_ID) {
+                    Int64? MSGCOL_FOLDERID = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_FOLDERID);
+                    if (MSGCOL_FOLDERID.HasValue && MSGCOL_FOLDERID == FLDCOL_ID) {
                         Int64 MSGCOL_DATE = Api.RetrieveColumnAsInt64(ses.JetSesid, Messages.JetTableid, C.MSGCOL_DATE).Value;
                         DateTime dt = new DateTime(MSGCOL_DATE).AddYears(1600).ToLocalTime();
                         String MSGCOL_NORMALSUBJ = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_NORMALSUBJ);
                         String MSGCOL_EMAILFROM = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_EMAILFROM, Encoding.Default);
+                        String MSGCOL_POP3UIDL = Api.RetrieveColumnAsString(ses.JetSesid, Messages.JetTableid, C.MSGCOL_POP3UIDL, Encoding.Unicode);
 
                         byte[] bookmark = Api.GetBookmark(ses.JetSesid, Messages.JetTableid);
 
@@ -188,6 +190,7 @@ namespace WLMFolderMover {
                         lvi.ImageKey = "M";
                         lvi.SubItems.Add(dt.ToString("yyyy/MM/dd HH:mm:ss"));
                         lvi.SubItems.Add(MSGCOL_EMAILFROM);
+                        lvi.SubItems.Add(MSGCOL_POP3UIDL);
                         lvi.Tag = bookmark;
                         lvM.Items.Add(lvi);
                     }
